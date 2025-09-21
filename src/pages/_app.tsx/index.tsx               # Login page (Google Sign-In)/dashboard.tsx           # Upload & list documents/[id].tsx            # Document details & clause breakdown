@@ -1,0 +1,99 @@
+Contents of the file: frontend/src/pages/_app.tsx
+
+import { AppProps } from 'next/app';
+import '../styles/globals.css';
+import { ThemeProvider } from 'shadcn/ui';
+import { IndianTheme } from '../theme/indian-theme';
+
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <ThemeProvider theme={IndianTheme}>
+      <Component {...pageProps} />
+    </ThemeProvider>
+  );
+}
+
+export default MyApp;
+
+Contents of the file: frontend/src/pages/index.tsx
+
+import { useEffect } from 'react';
+import { signIn } from 'next-auth/react';
+
+const LoginPage = () => {
+  useEffect(() => {
+    signIn('google'); // Automatically sign in with Google
+  }, []);
+
+  return (
+    <div className="flex items-center justify-center h-screen bg-saffron">
+      <h1 className="text-4xl font-bold text-white">Welcome to Legal AI Assistant</h1>
+    </div>
+  );
+};
+
+export default LoginPage;
+
+Contents of the file: frontend/src/pages/dashboard.tsx
+
+import { useEffect } from 'react';
+import FileUpload from '../components/FileUpload';
+import { useQuery } from 'react-query';
+import { fetchDocuments } from '../lib/apiClient';
+
+const DashboardPage = () => {
+  const { data: documents, isLoading } = useQuery('documents', fetchDocuments);
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Upload Documents</h1>
+      <FileUpload />
+      <h2 className="mt-4 text-xl">Uploaded Documents</h2>
+      <ul>
+        {documents.map((doc) => (
+          <li key={doc.id} className="my-2">
+            {doc.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default DashboardPage;
+
+Contents of the file: frontend/src/pages/results/[id].tsx
+
+import { useRouter } from 'next/router';
+import { useQuery } from 'react-query';
+import { fetchDocumentDetails } from '../../lib/apiClient';
+
+const DocumentDetailsPage = () => {
+  const router = useRouter();
+  const { id } = router.query;
+
+  const { data: documentDetails, isLoading } = useQuery(['documentDetails', id], () => fetchDocumentDetails(id));
+
+  if (isLoading) return <div>Loading...</div>;
+
+  return (
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">{documentDetails.title}</h1>
+      <div className="mt-4">
+        <h2 className="text-xl">Clause Breakdown</h2>
+        {documentDetails.clauses.map((clause) => (
+          <div key={clause.id} className="my-2 p-2 border rounded">
+            <h3 className="font-semibold">{clause.title}</h3>
+            <p>{clause.original}</p>
+            <p className="text-red-500">{clause.risks}</p>
+            <p>{clause.recommendations}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default DocumentDetailsPage;
