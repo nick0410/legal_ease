@@ -1,0 +1,53 @@
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import { getDocumentAnalysis } from '../../lib/apiClient';
+import ClauseCard from '../../components/ClauseCard';
+import Header from '../../components/Header';
+import Footer from '../../components/Footer';
+
+const DocumentResults = () => {
+    const router = useRouter();
+    const { id } = router.query;
+    const [analysis, setAnalysis] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        if (id) {
+            const fetchAnalysis = async () => {
+                try {
+                    const data = await getDocumentAnalysis(id);
+                    setAnalysis(data);
+                } catch (err) {
+                    setError('Failed to fetch document analysis.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchAnalysis();
+        }
+    }, [id]);
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>{error}</div>;
+
+    return (
+        <div className="min-h-screen bg-white text-gray-800">
+            <Header />
+            <main className="p-4">
+                <h1 className="text-2xl font-bold mb-4">Document Analysis Results</h1>
+                <div className="space-y-4">
+                    <h2 className="text-xl font-semibold">Summary</h2>
+                    <p>{analysis.summary}</p>
+                    <h2 className="text-xl font-semibold">Clause Breakdown</h2>
+                    {analysis.clauses.map((clause, index) => (
+                        <ClauseCard key={index} clause={clause} />
+                    ))}
+                </div>
+            </main>
+            <Footer />
+        </div>
+    );
+};
+
+export default DocumentResults;
