@@ -1,0 +1,11 @@
+fastapi
+google-cloud-storage
+google-cloud-firestore
+google-cloud-documentai
+google-cloud-aiplatform
+pydantic
+uvicorn
+python-dotenv
+requests
+aiofiles
+httpx

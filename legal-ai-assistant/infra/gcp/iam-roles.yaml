@@ -1,0 +1,27 @@
+# IAM Roles Configuration for Google Cloud Resources
+
+# This YAML file defines the IAM roles and permissions required for the Legal AI Assistant project.
+# It specifies roles for accessing Google Cloud services such as Vertex AI, Document AI, Firestore, and Cloud Storage.
+
+bindings:
+  - role: roles/viewer
+    members:
+      - user:YOUR_EMAIL@example.com  # Replace with the email of the user or service account
+
+  - role: roles/storage.admin
+    members:
+      - user:YOUR_EMAIL@example.com  # Replace with the email of the user or service account
+
+  - role: roles/documentai.admin
+    members:
+      - user:YOUR_EMAIL@example.com  # Replace with the email of the user or service account
+
+  - role: roles/aiplatform.admin
+    members:
+      - user:YOUR_EMAIL@example.com  # Replace with the email of the user or service account
+
+  - role: roles/datastore.user
+    members:
+      - user:YOUR_EMAIL@example.com  # Replace with the email of the user or service account
+
+# Note: Ensure to replace YOUR_EMAIL@example.com with the actual email addresses of users or service accounts that need access.

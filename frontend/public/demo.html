@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Legal AI Assistant — Frontend Demo</title>
+
+  <!-- Indian theme colors & professional typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --saffron:#FF9933;
+      --green:#138808;
+      --white:#ffffff;
+      --muted:#f6f7f8;
+      --card-shadow: 0 6px 18px rgba(15,23,42,0.08);
+      --chakra:#0b3d91;
+      --danger:#e02424;
+      --ok:#16a34a;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--muted),#ffffff);}
+    .container{max-width:1100px;margin:28px auto;padding:20px;}
+    header{display:flex;align-items:center;gap:16px;padding:14px 18px;background:linear-gradient(90deg,var(--saffron),var(--white));border-radius:12px;box-shadow:var(--card-shadow)}
+    .logo{display:flex;align-items:center;gap:12px}
+    .chakra{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 40% 30%, #fff 10%, var(--chakra) 11%);display:flex;align-items:center;justify-content:center;color:var(--white);font-weight:700;box-shadow:0 4px 10px rgba(0,0,0,0.06)}
+    h1{margin:0;font-size:20px;color:#07203a}
+    .subtitle{color:#083344;opacity:0.8;font-size:13px;margin-top:4px}
+
+    .grid{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-top:18px}
+    .card{background:var(--white);padding:18px;border-radius:12px;box-shadow:var(--card-shadow)}
+    .upload-area{display:flex;flex-direction:column;gap:12px;border:2px dashed rgba(7,32,58,0.06);padding:20px;border-radius:10px;align-items:center;justify-content:center;min-height:160px}
+    .btn{background:var(--chakra);color:var(--white);border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+    .btn.secondary{background:transparent;border:1px solid rgba(7,32,58,0.06);color:#07203a}
+    .file-info{font-size:13px;color:#133047}
+    .summary{font-size:15px;color:#0b2733}
+    .clauses{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+    .clause{border-radius:10px;padding:12px;background:linear-gradient(180deg,#fff,#fbfdff);border:1px solid rgba(7,32,58,0.03);display:flex;flex-direction:column;gap:8px}
+    .clause .meta{display:flex;justify-content:space-between;align-items:center}
+    .badge{padding:6px 8px;border-radius:999px;font-weight:700;color:var(--white);font-size:12px}
+    .risk-high{background:var(--danger)}
+    .risk-medium{background:#ffb020}
+    .risk-low{background:var(--ok)}
+
+    .chatbox{display:flex;flex-direction:column;height:70vh}
+    .chat-messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+    .bubble{max-width:80%;padding:10px 12px;border-radius:12px;box-shadow:0 6px 12px rgba(8,20,34,0.04);font-size:14px}
+    .bubble.user{align-self:flex-end;background:linear-gradient(90deg,var(--saffron),#ffb569);color:#07203a}
+    .bubble.ai{align-self:flex-start;background:#ffffff;border:1px solid rgba(7,32,58,0.06);color:#07203a}
+    .chat-input{display:flex;gap:8px;padding:8px;border-top:1px solid rgba(7,32,58,0.04);align-items:center}
+    input[type="text"]{flex:1;padding:10px;border-radius:10px;border:1px solid rgba(7,32,58,0.06)}
+    .small{font-size:12px;color:#445b63}
+
+    footer{margin-top:18px;text-align:center;color:#234a51;font-size:13px}
+    @media (max-width:900px){
+      .grid{grid-template-columns:1fr; }
+      .chatbox{height:50vh}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="chakra">अ</div>
+        <div>
+          <h1>Legal AI Assistant — Frontend Demo</h1>
+          <div class="subtitle">Professional UI — Indian theme (saffron • white • green)</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Left: Upload & Results -->
+      <div>
+        <div class="card">
+          <h3 style="margin:0 0 8px 0">Upload & Analyze</h3>
+          <div class="upload-area" id="uploadArea">
+            <div style="text-align:center">
+              <svg width="54" height="54" viewBox="0 0 24 24" fill="none" aria-hidden><path d="M12 3v9" stroke="#07203a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2" stroke="#07203a" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <div class="file-info" id="fileName">No file selected — demo mode</div>
+              <div style="margin-top:10px">
+                <input id="fileInput" type="file" accept=".pdf,.txt" style="display:none"/>
+                <button class="btn" id="chooseBtn">Choose File</button>
+                <button class="btn secondary" id="uploadBtn">Upload (mock)</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top:14px;display:flex;gap:10px;align-items:center">
+            <button class="btn" id="analyzeBtn">Analyze Document (mock)</button>
+            <button class="btn secondary" id="downloadJson">Download JSON</button>
+            <div style="margin-left:auto" class="small">Demo only — no cloud creds</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px" id="resultsCard" hidden>
+          <h3 style="margin:0 0 8px 0">Summary</h3>
+          <div class="summary" id="summaryText">—</div>
+
+          <h4 style="margin-top:12px;margin-bottom:8px">Clauses</h4>
+          <div class="clauses" id="clausesList"></div>
+        </div>
+      </div>
+
+      <!-- Right: Chat -->
+      <div>
+        <div class="card chatbox">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <strong>AI Chat</strong>
+              <div class="small">Ask questions about the demo document</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <div style="padding:6px 10px;border-radius:8px;background:var(--green);color:#fff;font-weight:700;font-size:13px">Demo</div>
+            </div>
+          </div>
+
+          <div class="chat-messages" id="chatMessages">
+            <!-- messages added here -->
+          </div>
+
+          <div class="chat-input">
+            <input id="chatInput" type="text" placeholder="Ask: e.g. 'What about termination?'" />
+            <button class="btn" id="sendBtn">Send</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <strong>Notes</strong>
+          <ul style="margin:8px 0 0 18px;color:#234a51">
+            <li>Static demo file that calls /api/mock endpoints on the same host.</li>
+            <li>To serve this file: place it in frontend/public/ and run your Next.js dev server (npm run dev) or run a static server from the frontend folder.</li>
+            <li>If you open the file directly via file://, fetch calls will fail — use a local web server.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      © Demo — Legal AI Assistant • UI preview with Indian theme
+    </footer>
+  </div>
+
+  <script>
+    // Use a fixed relative mock API base so the demo works when served by Next or a static server.
+    const apiBase = '/api/mock';
+
+    // DOM elements
+    const fileInput = document.getElementById('fileInput');
+    const chooseBtn = document.getElementById('chooseBtn');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const fileNameEl = document.getElementById('fileName');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const downloadJsonBtn = document.getElementById('downloadJson');
+    const resultsCard = document.getElementById('resultsCard');
+    const summaryText = document.getElementById('summaryText');
+    const clausesList = document.getElementById('clausesList');
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    let latestAnalysis = null;
+
+    chooseBtn.addEventListener('click', ()=>fileInput.click());
+    fileInput.addEventListener('change', ()=> {
+      const f = fileInput.files[0];
+      fileNameEl.textContent = f ? f.name : 'No file selected';
+    });
+
+    uploadBtn.addEventListener('click', async ()=>{
+      uploadBtn.disabled = true; uploadBtn.textContent = 'Uploading...';
+      try{
+        const res = await fetch(apiBase + '/upload', { method:'POST' });
+        const data = await res.json();
+        fileNameEl.textContent = `Uploaded: ${data.filename || data.docId}`;
+      }catch(e){
+        fileNameEl.textContent = 'Upload failed (demo)';
+      }finally{
+        uploadBtn.disabled = false; uploadBtn.textContent = 'Upload (mock)';
+      }
+    });
+
+    analyzeBtn.addEventListener('click', async ()=>{
+      analyzeBtn.disabled = true; analyzeBtn.textContent='Analyzing...';
+      try{
+        const res = await fetch(apiBase + '/analyze', { method:'POST' });
+        const json = await res.json();
+        latestAnalysis = json;
+        renderAnalysis(json);
+      }catch(err){
+        summaryText.textContent = 'Analysis failed (demo).';
+        resultsCard.hidden = false;
+      }finally{
+        analyzeBtn.disabled = false; analyzeBtn.textContent='Analyze Document (mock)';
+      }
+    });
+
+    downloadJsonBtn.addEventListener('click', ()=>{
+      if(!latestAnalysis) return alert('No analysis to download');
+      const blob = new Blob([JSON.stringify(latestAnalysis,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = (latestAnalysis.docId||'analysis')+'.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    });
+
+    function renderAnalysis(data){
+      resultsCard.hidden = false;
+      summaryText.textContent = data.summary || '—';
+      clausesList.innerHTML = '';
+      (data.clauses || []).forEach(c=>{
+        const div = document.createElement('div'); div.className='clause';
+        const meta = document.createElement('div'); meta.className='meta';
+        const title = document.createElement('div'); title.innerHTML = `<strong>${escapeHtml(c.title)}</strong><div class="small">${escapeHtml(c.id)}</div>`;
+        const badge = document.createElement('div'); badge.className='badge ' + (c.riskLevel==='high'?'risk-high':(c.riskLevel==='medium'?'risk-medium':'risk-low')); badge.textContent = (c.riskLevel||'low').toUpperCase();
+        meta.appendChild(title); meta.appendChild(badge);
+
+        const orig = document.createElement('div'); orig.innerHTML = `<em>Original:</em> ${escapeHtml(c.original || '')}`;
+        const plain = document.createElement('div'); plain.innerHTML = `<em>Plain English:</em> ${escapeHtml(c.plainEnglish || '')}`;
+        const risks = document.createElement('div'); risks.innerHTML = `<em>Risks:</em> ${escapeHtml((c.risks||[]).join('; '))}`;
+        const rec = document.createElement('div'); rec.innerHTML = `<em>Recommendations:</em> ${escapeHtml((c.recommendations||[]).join('; '))}`;
+
+        div.appendChild(meta); div.appendChild(orig); div.appendChild(plain); div.appendChild(risks); div.appendChild(rec);
+        clausesList.appendChild(div);
+      });
+      resultsCard.scrollIntoView({behavior:'smooth'});
+    }
+
+    // Chat handlers
+    sendBtn.addEventListener('click', sendChat);
+    chatInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendChat(); });
+
+    async function sendChat(){
+      const text = chatInput.value.trim();
+      if(!text) return;
+      addMessage('user', text);
+      chatInput.value='';
+      addMessage('ai','…'); // typing indicator
+      try{
+        const res = await fetch(apiBase + '/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({question:text}) });
+        const json = await res.json();
+        removeTyping();
+        const reply = (json.reply && json.reply.text) ? json.reply.text : (typeof json.reply === 'string' ? json.reply : 'No reply');
+        addMessage('ai', reply);
+      }catch(e){
+        removeTyping();
+        addMessage('ai','Error: chat failed (demo)');
+      }
+    }
+
+    function addMessage(who, text){
+      const b = document.createElement('div');
+      b.className = 'bubble ' + (who==='user' ? 'user' : 'ai');
+      b.textContent = text;
+      chatMessages.appendChild(b);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    function removeTyping(){
+      const nodes = Array.from(chatMessages.children);
+      const typing = nodes.find(n=>n.textContent==='…');
+      if(typing) typing.remove();
+    }
+
+    function escapeHtml(str){
+      return String(str || '').replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
+    }
+
+    // auto-load demo analysis on first open
+    (async function init(){
+      try{
+        const res = await fetch(apiBase + '/analyze', { method:'POST' });
+        const json = await res.json();
+        latestAnalysis = json;
+        renderAnalysis(json);
+      }catch(e){
+        // ignore
+      }
+    })();
+  </script>
+</body>
+</html>
